@@ -10,6 +10,7 @@ class QueryTranslator(BaseQueryTranslator):
 
     def __init__(self, options, dialect, basepath):
         super().__init__(options, dialect, basepath)
+        logger.debug("!!! dialect (init)="+dialect)
         self.select_fields = read_json(f"aql_{self.dialect}_fields", options)
 
     def map_selections(self):

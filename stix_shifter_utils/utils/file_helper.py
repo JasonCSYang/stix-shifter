@@ -21,6 +21,7 @@ def read_json(filepath, options, search_path=__default_search_path):
     trim_str = '.json'
     if file_key.endswith(trim_str):
         file_key = file_key[:-len(trim_str)]
+        logger.debug('file_key: ' + file_key)
     if 'mapping' in options and file_key in options['mapping']:
         logger.debug('returning options_mapping for: ' + filepath)
         return options['mapping'][file_key]
@@ -32,6 +33,7 @@ def read_json(filepath, options, search_path=__default_search_path):
         if not file_name.endswith(trim_str):
             file_name = file_name + trim_str
         json_path = get_json_path(search_path)
+        logger.debug('json_path: ' + file_key)
         file_path = os.path.join(json_path, file_name)
         logger.debug('returning in_module_path for: ' + filepath + '->' + file_path)
     try:
@@ -39,6 +41,12 @@ def read_json(filepath, options, search_path=__default_search_path):
             return json.load(f)
     except Exception as e:
         logger.warning('Filepath for ' + file_path + ' still does not exist. Returning empty json')
+        # printing stack trace for debug
+        stacktrace = ""
+        for line in traceback.format_stack():
+            if (line.find("python") < 0 or line.find("stix_shifter") >= 0):
+                stacktrace = stacktrace + line.strip() + "\n"
+        logger.debug('Stack Trace: ' + stacktrace)
         return {}
 
 

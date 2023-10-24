@@ -21,6 +21,9 @@ from stix_shifter_utils.utils.param_validator import param_validator, modernize_
 from stix_shifter_utils.stix_translation.src.utils.exceptions import UnsupportedDialectException
 from stix_shifter_utils.utils.error_response import ErrorResponder
 from stix_shifter_utils.stix_translation.src.json_to_stix.json_to_stix import JSONToStix
+from stix_shifter_utils.utils.logger import set_logger
+
+logger = set_logger(__name__)
 
 OPTION_LANGUAGE = 'language'
 
@@ -99,6 +102,7 @@ class BaseEntryPoint:
         module_name = self.__connector_module
         dialects = dialect_list(module_name, self.__options) # get list of dialects from configuration
         for dialect in dialects:
+            logger.debug("!!! dialect: " + dialect)
             if self.__options:
                 is_default = True
             else:
@@ -157,11 +161,11 @@ class BaseEntryPoint:
             return self.__dialect_to_query_translator[self.__dialect_default[self.__options.get(OPTION_LANGUAGE, "stix")]]
         except KeyError as ex:
             raise UnsupportedDialectException(dialect)
-        
+
     @translation
     def __combine_default_results_translator_to_stix_maps(self, dialects:list=None):
         """
-        Returns default or dialect specific ResultTranslator. 
+        Returns default or dialect specific ResultTranslator.
         If there are multiple dialects in the module and 'dialects' list argument is specified, the return combines
         the corresponding ResultTranslators' map_data into a copy of the default ResultTranslator and returns it.
         """
@@ -220,7 +224,7 @@ class BaseEntryPoint:
         if include_hidden:
             return self.__dialects_all
         return self.__dialects_active_default
-    
+
     @translation
     def get_configs_full(self):
         return get_merged_config(self.__connector_module)
@@ -325,12 +329,12 @@ class BaseEntryPoint:
     async def create_results_stix_connection(self, search_id, offset, length, data_source, metadata=None):
         result = None
         if metadata:
-            result = self.__results_connector.create_results_stix_connection(self, search_id, offset, length, data_source, metadata) 
+            result = self.__results_connector.create_results_stix_connection(self, search_id, offset, length, data_source, metadata)
         else:
             result = self.__results_connector.create_results_stix_connection(self, search_id, offset, length, data_source)
         if isawaitable(result):
             result = await result
-        return result        
+        return result
 
     def set_delete_connector(self, connector):
         if not isinstance(connector, (BaseConnector, BaseDeleteConnector)):
@@ -342,7 +346,7 @@ class BaseEntryPoint:
         result = self.__delete_connector.delete_query_connection(search_id)
         if isawaitable(result):
             result = await result
-        return result   
+        return result
 
 
     def set_ping_connector(self, connector):
@@ -355,7 +359,7 @@ class BaseEntryPoint:
         result = self.__ping_connector.ping_connection()
         if isawaitable(result):
             result = await result
-        return result   
+        return result
 
     def set_async(self, is_async):
         self.__async = is_async
